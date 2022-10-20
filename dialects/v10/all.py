@@ -5768,11 +5768,13 @@ MAVLINK_MSG_ID_ALTITUDE = 141
 MAVLINK_MSG_ID_RESOURCE_REQUEST = 142
 MAVLINK_MSG_ID_SCALED_PRESSURE3 = 143
 MAVLINK_MSG_ID_FOLLOW_TARGET = 144
+MAVLINK_MSG_ID_CV_DATA = 145
 MAVLINK_MSG_ID_CONTROL_SYSTEM_STATE = 146
 MAVLINK_MSG_ID_BATTERY_STATUS = 147
 MAVLINK_MSG_ID_AUTOPILOT_VERSION = 148
 MAVLINK_MSG_ID_LANDING_TARGET = 149
 MAVLINK_MSG_ID_FENCE_STATUS = 162
+MAVLINK_MSG_ID_DISTANCE_SENSOR_RASP_LD06 = 187
 MAVLINK_MSG_ID_MAG_CAL_REPORT = 192
 MAVLINK_MSG_ID_EFI_STATUS = 225
 MAVLINK_MSG_ID_ESTIMATOR_STATUS = 230
@@ -12094,6 +12096,43 @@ class MAVLink_follow_target_message(MAVLink_message):
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 127, struct.pack('<QQiif3f3f4f3f3fB', self.timestamp, self.custom_state, self.lat, self.lon, self.alt, self.vel[0], self.vel[1], self.vel[2], self.acc[0], self.acc[1], self.acc[2], self.attitude_q[0], self.attitude_q[1], self.attitude_q[2], self.attitude_q[3], self.rates[0], self.rates[1], self.rates[2], self.position_cov[0], self.position_cov[1], self.position_cov[2], self.est_capabilities), force_mavlink1=force_mavlink1)
 
+class MAVLink_cv_data_message(MAVLink_message):
+        '''
+        companion data input
+        '''
+        id = MAVLINK_MSG_ID_CV_DATA
+        name = 'CV_DATA'
+        fieldnames = ['time_usec', 'data_flag', 'data_x', 'data_y', 'rsul_x', 'rsul_y']
+        ordered_fieldnames = ['time_usec', 'data_x', 'data_y', 'rsul_x', 'rsul_y', 'data_flag']
+        fieldtypes = ['uint64_t', 'uint8_t', 'float', 'float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {"time_usec": "us"}
+        format = '<QffffB'
+        native_format = bytearray('<QffffB', 'ascii')
+        orders = [0, 5, 1, 2, 3, 4]
+        lengths = [1, 1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0, 0]
+        crc_extra = 109
+        unpacker = struct.Struct('<QffffB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, time_usec, data_flag, data_x, data_y, rsul_x, rsul_y):
+                MAVLink_message.__init__(self, MAVLink_cv_data_message.id, MAVLink_cv_data_message.name)
+                self._fieldnames = MAVLink_cv_data_message.fieldnames
+                self._instance_field = MAVLink_cv_data_message.instance_field
+                self._instance_offset = MAVLink_cv_data_message.instance_offset
+                self.time_usec = time_usec
+                self.data_flag = data_flag
+                self.data_x = data_x
+                self.data_y = data_y
+                self.rsul_x = rsul_x
+                self.rsul_y = rsul_y
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 109, struct.pack('<QffffB', self.time_usec, self.data_x, self.data_y, self.rsul_x, self.rsul_y, self.data_flag), force_mavlink1=force_mavlink1)
+
 class MAVLink_control_system_state_message(MAVLink_message):
         '''
         The smoothed, monotonic system state used to feed the control
@@ -12301,6 +12340,42 @@ class MAVLink_fence_status_message(MAVLink_message):
 
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 189, struct.pack('<IHBB', self.breach_time, self.breach_count, self.breach_status, self.breach_type), force_mavlink1=force_mavlink1)
+
+class MAVLink_distance_sensor_rasp_ld06_message(MAVLink_message):
+        '''
+        Request for raspi run LD06
+        '''
+        id = MAVLINK_MSG_ID_DISTANCE_SENSOR_RASP_LD06
+        name = 'DISTANCE_SENSOR_RASP_LD06'
+        fieldnames = ['angle', 'distance', 'orientation', 'min_distance', 'max_distance']
+        ordered_fieldnames = ['angle', 'distance', 'max_distance', 'orientation', 'min_distance']
+        fieldtypes = ['float', 'float', 'uint8_t', 'uint8_t', 'uint16_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {"angle": "deg", "distance": "m", "min_distance": "cm", "max_distance": "cm"}
+        format = '<ffHBB'
+        native_format = bytearray('<ffHBB', 'ascii')
+        orders = [0, 1, 3, 4, 2]
+        lengths = [1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0]
+        crc_extra = 32
+        unpacker = struct.Struct('<ffHBB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, angle, distance, orientation, min_distance, max_distance):
+                MAVLink_message.__init__(self, MAVLink_distance_sensor_rasp_ld06_message.id, MAVLink_distance_sensor_rasp_ld06_message.name)
+                self._fieldnames = MAVLink_distance_sensor_rasp_ld06_message.fieldnames
+                self._instance_field = MAVLink_distance_sensor_rasp_ld06_message.instance_field
+                self._instance_offset = MAVLink_distance_sensor_rasp_ld06_message.instance_offset
+                self.angle = angle
+                self.distance = distance
+                self.orientation = orientation
+                self.min_distance = min_distance
+                self.max_distance = max_distance
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 32, struct.pack('<ffHBB', self.angle, self.distance, self.max_distance, self.orientation, self.min_distance), force_mavlink1=force_mavlink1)
 
 class MAVLink_mag_cal_report_message(MAVLink_message):
         '''
@@ -13588,11 +13663,13 @@ mavlink_map = {
         MAVLINK_MSG_ID_RESOURCE_REQUEST : MAVLink_resource_request_message,
         MAVLINK_MSG_ID_SCALED_PRESSURE3 : MAVLink_scaled_pressure3_message,
         MAVLINK_MSG_ID_FOLLOW_TARGET : MAVLink_follow_target_message,
+        MAVLINK_MSG_ID_CV_DATA : MAVLink_cv_data_message,
         MAVLINK_MSG_ID_CONTROL_SYSTEM_STATE : MAVLink_control_system_state_message,
         MAVLINK_MSG_ID_BATTERY_STATUS : MAVLink_battery_status_message,
         MAVLINK_MSG_ID_AUTOPILOT_VERSION : MAVLink_autopilot_version_message,
         MAVLINK_MSG_ID_LANDING_TARGET : MAVLink_landing_target_message,
         MAVLINK_MSG_ID_FENCE_STATUS : MAVLink_fence_status_message,
+        MAVLINK_MSG_ID_DISTANCE_SENSOR_RASP_LD06 : MAVLink_distance_sensor_rasp_ld06_message,
         MAVLINK_MSG_ID_MAG_CAL_REPORT : MAVLink_mag_cal_report_message,
         MAVLINK_MSG_ID_EFI_STATUS : MAVLink_efi_status_message,
         MAVLINK_MSG_ID_ESTIMATOR_STATUS : MAVLink_estimator_status_message,
@@ -19295,6 +19372,34 @@ class MAVLink(object):
                 '''
                 return self.send(self.follow_target_encode(timestamp, est_capabilities, lat, lon, alt, vel, acc, attitude_q, rates, position_cov, custom_state), force_mavlink1=force_mavlink1)
 
+        def cv_data_encode(self, time_usec, data_flag, data_x, data_y, rsul_x, rsul_y):
+                '''
+                companion data input
+
+                time_usec                 : Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude of the number. [us] (type:uint64_t)
+                data_flag                 :  (type:uint8_t)
+                data_x                    :  (type:float)
+                data_y                    :  (type:float)
+                rsul_x                    :  (type:float)
+                rsul_y                    :  (type:float)
+
+                '''
+                return MAVLink_cv_data_message(time_usec, data_flag, data_x, data_y, rsul_x, rsul_y)
+
+        def cv_data_send(self, time_usec, data_flag, data_x, data_y, rsul_x, rsul_y, force_mavlink1=False):
+                '''
+                companion data input
+
+                time_usec                 : Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude of the number. [us] (type:uint64_t)
+                data_flag                 :  (type:uint8_t)
+                data_x                    :  (type:float)
+                data_y                    :  (type:float)
+                rsul_x                    :  (type:float)
+                rsul_y                    :  (type:float)
+
+                '''
+                return self.send(self.cv_data_encode(time_usec, data_flag, data_x, data_y, rsul_x, rsul_y), force_mavlink1=force_mavlink1)
+
         def control_system_state_encode(self, time_usec, x_acc, y_acc, z_acc, x_vel, y_vel, z_vel, x_pos, y_pos, z_pos, airspeed, vel_variance, pos_variance, q, roll_rate, pitch_rate, yaw_rate):
                 '''
                 The smoothed, monotonic system state used to feed the control loops of
@@ -19480,6 +19585,32 @@ class MAVLink(object):
 
                 '''
                 return self.send(self.fence_status_encode(breach_status, breach_count, breach_type, breach_time), force_mavlink1=force_mavlink1)
+
+        def distance_sensor_rasp_ld06_encode(self, angle, distance, orientation, min_distance, max_distance):
+                '''
+                Request for raspi run LD06
+
+                angle                     : current deg 0--360 [deg] (type:float)
+                distance                  : current distance [m] (type:float)
+                orientation               : current distance (type:uint8_t)
+                min_distance              : current distance [cm] (type:uint8_t)
+                max_distance              : current distance [cm] (type:uint16_t)
+
+                '''
+                return MAVLink_distance_sensor_rasp_ld06_message(angle, distance, orientation, min_distance, max_distance)
+
+        def distance_sensor_rasp_ld06_send(self, angle, distance, orientation, min_distance, max_distance, force_mavlink1=False):
+                '''
+                Request for raspi run LD06
+
+                angle                     : current deg 0--360 [deg] (type:float)
+                distance                  : current distance [m] (type:float)
+                orientation               : current distance (type:uint8_t)
+                min_distance              : current distance [cm] (type:uint8_t)
+                max_distance              : current distance [cm] (type:uint16_t)
+
+                '''
+                return self.send(self.distance_sensor_rasp_ld06_encode(angle, distance, orientation, min_distance, max_distance), force_mavlink1=force_mavlink1)
 
         def mag_cal_report_encode(self, compass_id, cal_mask, cal_status, autosaved, fitness, ofs_x, ofs_y, ofs_z, diag_x, diag_y, diag_z, offdiag_x, offdiag_y, offdiag_z):
                 '''
